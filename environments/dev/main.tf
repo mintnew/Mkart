@@ -27,7 +27,7 @@ module "rds" {
   db_name  = "productdb"
   username = "postgres"
 
-  password = data.aws_secretsmanager_secret_version.db_password.secret_string
+  password = local.db_creds.password
 
   allowed_cidr_blocks = ["10.0.0.0/16"]
 }
@@ -40,9 +40,10 @@ module "github_oidc" {
 }
 
 data "aws_secretsmanager_secret" "db" {
-  name = "db-password"
+  name = "prod/db-credentials"
 }
 
-data "aws_secretsmanager_secret_version" "db_password" {
+data "aws_secretsmanager_secret_version" "db_value" {
   secret_id = data.aws_secretsmanager_secret.db.id
 }
+
