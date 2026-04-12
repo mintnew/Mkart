@@ -20,8 +20,8 @@ jobs:
       uses: actions/checkout@v3
 
     # 2. Get image tag from CI
-    - name: Read image tag
-      run: echo "IMAGE_TAG=${{ github.event.client_payload.image_tag }}" >> $GITHUB_ENV
+    - name: Get commit SHA
+      run: echo "IMAGE_TAG=${{ github.event.workflow_run.head_commit.id }}" >> $GITHUB_ENV
 
     # 3. Define variables
     - name: Set variables
