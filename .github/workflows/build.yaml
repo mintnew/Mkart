@@ -1,4 +1,4 @@
-name: cloudnative-platform-image-build
+name: Mkart-platform-image-build
 
 on:
   push:
