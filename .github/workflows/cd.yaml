@@ -1,8 +1,10 @@
 name: CD Pipeline
 
 on:
-  repository_dispatch:
-    types: [trigger-cd]
+  workflow_run:
+    workflows: ["Mkart-platform-image-build"]
+    types:
+      - completed
 
 permissions:
   contents: write
