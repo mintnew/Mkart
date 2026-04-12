@@ -1,0 +1,47 @@
+name: CD Pipeline
+
+on:
+  repository_dispatch:
+    types: [trigger-cd]
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    # 1. Checkout repo
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # 2. Get image tag from CI
+    - name: Read image tag
+      run: echo "IMAGE_TAG=${{ github.event.client_payload.image_tag }}" >> $GITHUB_ENV
+
+    # 3. Define variables
+    - name: Set variables
+      run: |
+        echo "ECR_URI=317105901372.dkr.ecr.ap-south-1.amazonaws.com/frontend" >> $GITHUB_ENV
+        echo "MANIFEST=kubernetes/manifests/frontend-deployment.yaml" >> $GITHUB_ENV
+
+    # 4. Update Kubernetes manifest
+    - name: Update image in manifest
+      run: |
+        sed -i "s|image: .*|image: $ECR_URI:$IMAGE_TAG|g" $MANIFEST
+
+    # 5. Show updated file (debug)
+    - name: Verify changes
+      run: cat $MANIFEST
+
+    # 6. Commit changes
+    - name: Commit changes
+      run: |
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+
+        git add $MANIFEST
+        git commit -m "CD: update image to $IMAGE_TAG"
+        git push
