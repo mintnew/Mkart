@@ -2,7 +2,7 @@ name: cloudnative-platform-image-build
 
 on:
   push:
-    branches: [ docker_iac ]
+    branches: [ main ]
 
 permissions:
   id-token: write
@@ -26,19 +26,19 @@ jobs:
       # 3. Install dependencies (Frontend example)
       - name: Install Dependencies
         run: |
-          cd docker/frontend
+          cd frontend
           npm install
 
       # 4. Lint Code
       - name: Run Lint
         run: |
-          cd docker/frontend
+          cd frontend
           npm run lint || echo "No lint configured"
 
       # 5. Run Tests
       - name: Run Tests
         run: |
-          cd docker/frontend
+          cd frontend
           npm test -- --watchAll=false || echo "No tests configured"
 
       # 6. Configure AWS (OIDC)
