@@ -4,17 +4,23 @@ on:
   push:
     branches: [ dev ]
 
+permissions:
+  id-token: write
+  contents: write
+
 jobs:
   ci:
-    uses: ./.github/workflows/reusable-ci.yml
+    uses: mintnew/Mkart/.github/workflows/reusable-ci.yaml@dev
+    secrets: inherit
     with:
       ecr_repository: frontend-dev
 
   cd:
     needs: ci
-    uses: ./.github/workflows/reusable-cd.yml
+    uses: mintnew/Mkart/.github/workflows/reusable-cd.yaml@dev
+    secrets: inherit
     with:
       image_tag: ${{ needs.ci.outputs.image_tag }}
       ecr_uri: 317105901372.dkr.ecr.ap-south-1.amazonaws.com/frontend-dev
       manifest_path: kubernetes/manifests/dev/frontend-deployment.yaml
-      environment: dev
+      environment: prod
