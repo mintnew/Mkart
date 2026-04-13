@@ -17,7 +17,8 @@ on:
         type: string
 
 permissions:
-  contents: write
+  id-token: write
+  contents: read
 
 jobs:
   deploy:
