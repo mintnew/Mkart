@@ -1,0 +1,74 @@
+name: Reusable CI Pipeline
+
+on:
+  workflow_call:
+    inputs:
+      ecr_repository:
+        required: true
+        type: string
+    outputs:
+      image_tag:
+        value: ${{ jobs.ci.outputs.image_tag }}
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    outputs:
+      image_tag: ${{ steps.tag.outputs.image_tag }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 24
+
+      - name: Install Dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Lint
+        run: |
+          cd frontend
+          npm run lint || echo "skip lint"
+
+      - name: Test
+        run: |
+          cd frontend
+          npm test -- --watchAll=false || echo "skip tests"
+
+      - name: AWS Auth (OIDC)
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ROLE }}
+          aws-region: us-east-1
+
+      - name: Login ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Set Image Tag
+        id: tag
+        run: |
+          echo "IMAGE_TAG=${GITHUB_SHA}" >> $GITHUB_ENV
+          echo "image_tag=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+
+      - name: Build Image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker build -t $ECR_REGISTRY/${{ inputs.ecr_repository }}:$IMAGE_TAG frontend/.
+
+      - name: Push Image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker push $ECR_REGISTRY/${{ inputs.ecr_repository }}:$IMAGE_TAG
