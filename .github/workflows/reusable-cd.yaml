@@ -39,4 +39,5 @@ jobs:
 
           git add ${{ inputs.manifest_path }}
           git commit -m "Deploy (${{ inputs.environment }}): ${{ inputs.image_tag }}" || echo "No changes"
+          git remote set-url origin https://x-access-token:${{ secrets.GH_PAT }}@github.com/mintnew/Mkart.git
           git push
