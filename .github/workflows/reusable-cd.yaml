@@ -1,0 +1,41 @@
+name: Reusable CD Pipeline
+
+on:
+  workflow_call:
+    inputs:
+      image_tag:
+        required: true
+        type: string
+      ecr_uri:
+        required: true
+        type: string
+      manifest_path:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Update Kubernetes Manifest
+        run: |
+          sed -i "s|image: .*|image: ${{ inputs.ecr_uri }}:${{ inputs.image_tag }}|g" ${{ inputs.manifest_path }}
+
+      - name: Commit Changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git add ${{ inputs.manifest_path }}
+          git commit -m "Deploy (${{ inputs.environment }}): ${{ inputs.image_tag }}" || echo "No changes"
+          git push

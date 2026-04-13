@@ -1,0 +1,20 @@
+name: Dev Pipeline
+
+on:
+  push:
+    branches: [ dev ]
+
+jobs:
+  ci:
+    uses: ./.github/workflows/reusable-ci.yml
+    with:
+      ecr_repository: frontend-dev
+
+  cd:
+    needs: ci
+    uses: ./.github/workflows/reusable-cd.yml
+    with:
+      image_tag: ${{ needs.ci.outputs.image_tag }}
+      ecr_uri: 317105901372.dkr.ecr.ap-south-1.amazonaws.com/frontend-dev
+      manifest_path: kubernetes/manifests/dev/frontend-deployment.yaml
+      environment: dev
