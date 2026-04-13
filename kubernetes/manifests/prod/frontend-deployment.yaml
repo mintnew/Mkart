@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: 317105901372.dkr.ecr.us-east-1.amazonaws.com/ecommerce-frontend:latest
+          image: 317105901372.dkr.ecr.ap-south-1.amazonaws.com/frontend-prod:e0e59d6a45dd9922354c44df6434eb269e85f7e7
           ports:
             - containerPort: 80
